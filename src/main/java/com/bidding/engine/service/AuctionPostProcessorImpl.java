@@ -24,9 +24,6 @@ public class AuctionPostProcessorImpl implements AuctionPostProcessor{
 	@Override
 	public void postProcess(BidExecutionDetail bidExecutionDetail) {
 		// TODO Auto-generated method stub
-		// update status table
-		// delete entry from slot table and bidder table
-		// sender winner notifincation
 		bidderRepository.deleteBySlotId(bidExecutionDetail.getSlotId());
 		auctionSlotRepository.deleteById(bidExecutionDetail.getSlotId());
 		

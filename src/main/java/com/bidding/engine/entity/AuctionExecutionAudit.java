@@ -5,14 +5,19 @@ import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "AUCTION_EXECUTION_AUDIT")
 public class AuctionExecutionAudit {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_audit_seq")
+    @SequenceGenerator(name = "execution_audit_seq", sequenceName = "execution_audit_seq", allocationSize = 1)
     @Column(name = "auction_exe_audit_id")
     private Long auctionExeAuditId;
 
@@ -30,9 +35,6 @@ public class AuctionExecutionAudit {
 
     @Column(name = "bid_amount", nullable = false, precision = 9, scale = 2)
     private BigDecimal bidAmount;
-
-    @Column(name = "status", nullable = false)
-    private String status;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
@@ -104,22 +106,23 @@ public class AuctionExecutionAudit {
 	}
 
 
-	public String getStatus() {
-		return status;
-	}
-
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
-
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 
 	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
+
+	public AuctionExecutionAudit( String auctionExeId, Long slotId, Long productId,
+			Long bidderId, BigDecimal bidAmount, LocalDateTime createdAt) {
+		super();
+		this.auctionExeId = auctionExeId;
+		this.slotId = slotId;
+		this.productId = productId;
+		this.bidderId = bidderId;
+		this.bidAmount = bidAmount;
 		this.createdAt = createdAt;
 	}
 

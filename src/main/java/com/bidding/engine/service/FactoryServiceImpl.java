@@ -7,7 +7,9 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.bidding.engine.dto.BidExecutionDetail;
+import com.bidding.engine.dto.BidRequest;
 import com.bidding.engine.dto.BidResponse;
+import com.bidding.engine.entity.AuctionExecutionAudit;
 import com.bidding.engine.entity.AuctionSlot;
 import com.bidding.engine.entity.AuctionSlotLive;
 
@@ -31,6 +33,11 @@ public class FactoryServiceImpl implements FactoryService{
 	@Override
 	public BidResponse geneBidResponse() {
 		return new BidResponse();
+	}
+
+	@Override
+	public AuctionExecutionAudit genAuctionExecutionAudit(BidExecutionDetail bidExecutionDetail,BidRequest bidRequest) {
+		return new AuctionExecutionAudit(bidExecutionDetail.getBidExecutionId(), bidExecutionDetail.getSlotId(), bidExecutionDetail.getProductId(), bidRequest.getUserId(), bidRequest.getBidAmount(), LocalDateTime.now());
 	}
 
 }

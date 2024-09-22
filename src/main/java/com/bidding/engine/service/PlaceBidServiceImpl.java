@@ -9,7 +9,6 @@ import com.bidding.engine.dto.BidExecutionDetail;
 import com.bidding.engine.dto.BidRequest;
 import com.bidding.engine.dto.BidResponse;
 import com.bidding.engine.enums.BidResult;
-import com.bidding.engine.repository.AuctionSlotLiveRepository;
 import com.bidding.engine.utils.AuctionExecutionMap;
 
 import jakarta.transaction.Transactional;
@@ -24,7 +23,8 @@ public class PlaceBidServiceImpl implements PlaceBidService{
 	private FactoryService factoryService;
 	
 	@Autowired
-	private AuctionSlotLiveRepository auctionSlotLiveRepository;
+	private PostBidTaskService postBidTaskService;
+	
 	
 	@Transactional
 	@Override
@@ -46,8 +46,8 @@ public class PlaceBidServiceImpl implements PlaceBidService{
         	    }
         	}
         }
-        //Add logic to call the queue to give it the latest state, it will handle the update of latest score, auditing
-        auctionSlotLiveRepository.updateHighBid(bidExecutionDetail.getHighestBidAmount(),bidExecutionDetail.getBidExecutionId());
+        //wait for the acknowledgement
+        postBidTaskService.executePostBidTask(bidExecutionDetail, bidRequest);
         return bidResponse;
     }
 }

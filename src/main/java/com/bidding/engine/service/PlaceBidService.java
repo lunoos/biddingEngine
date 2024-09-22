@@ -1,5 +1,8 @@
 package com.bidding.engine.service;
 
-public interface PlaceBidService {
+import com.bidding.engine.dto.BidRequest;
+import com.bidding.engine.dto.BidResponse;
 
+public interface PlaceBidService {
+	public BidResponse placeBid(BidRequest bidRequest);
 }

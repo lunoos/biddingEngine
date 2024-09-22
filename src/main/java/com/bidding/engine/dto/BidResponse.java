@@ -17,4 +17,9 @@ public class BidResponse {
 		this.response = response;
 	}
 	
+	public BidResponse() {
+		super();
+	}
+	
+	
 }

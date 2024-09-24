@@ -3,7 +3,9 @@ package com.bidding.engine.aspect;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
+import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
@@ -18,6 +20,7 @@ import com.bidding.engine.entity.AuctionExecutionStatus;
 import com.bidding.engine.entity.AuctionSlot;
 import com.bidding.engine.enums.ProcessStatus;
 import com.bidding.engine.repository.AuctionExecutionStatusRepository;
+import com.bidding.engine.service.AuctionExecutionStatusService;
 
 import jakarta.transaction.Transactional;
 
@@ -28,7 +31,7 @@ public class LoggingAspect {
     private static final Logger logger = LoggerFactory.getLogger(LoggingAspect.class);
     
     @Autowired
-    private AuctionExecutionStatusRepository auctionExecutionStatusRepository;
+    private AuctionExecutionStatusService auctionExecutionStatusService;
 
     @Around("execution(* com.insta.backend.service.*.*(..))") // This pointcut expression targets all methods in your package
     public Object logServiceMethodExecution(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -45,7 +48,6 @@ public class LoggingAspect {
         return result;
     }
     
-    @Transactional
     @Around("@annotation(PreStatusUpdate)") // This pointcut expression targets all methods in your package
     public Object logExecutionPreStatus(ProceedingJoinPoint joinPoint) throws Throwable {
     	MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -59,14 +61,14 @@ public class LoggingAspect {
         long startTime = System.currentTimeMillis();
         AuctionExecutionStatus auctionExecutionStatus = new AuctionExecutionStatus("tmpExecutonId", bidExecutionDetail.getSlotId(),
         		methodName.toUpperCase(), ProcessStatus.IN_PROGRESS.name(), bidExecutionDetail.getProductId(), methodName, LocalDateTime.now(), LocalDateTime.now());
-        auctionExecutionStatusRepository.save(auctionExecutionStatus);
+        auctionExecutionStatusService.createExecutionStatus(auctionExecutionStatus);
         Object result = joinPoint.proceed();
         long endTime = System.currentTimeMillis();
         auctionExecutionStatus.setEndTime(LocalDateTime.now());
         BidExecutionDetail bidExecutionDet = (BidExecutionDetail)result;
         auctionExecutionStatus.setAuctionExeId(bidExecutionDet.getBidExecutionId());
         auctionExecutionStatus.setProcessStatus(ProcessStatus.COMPLETED.name());
-        auctionExecutionStatusRepository.save(auctionExecutionStatus);
+        auctionExecutionStatusService.updateExecutionStatus(auctionExecutionStatus);
         logger.info("Exiting method [{}] in class [{}] with result: {}",
                     methodName, className, result);
         logger.info("Method [{}] execution time: {} ms", methodName, (endTime - startTime));
@@ -74,28 +76,9 @@ public class LoggingAspect {
         return result;
     }
     
-    @Transactional
-    @Around("@annotation(ProcessStatusUpdate)") // This pointcut expression targets all methods in your package
-    public Object logExecutionProcessStatus(ProceedingJoinPoint joinPoint) throws Throwable {
-    	MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-    	String methodName = methodSignature.getName();
-        Object[] args = joinPoint.getArgs();
-
-       BidExecutionDetail bidExecutionDetail = (BidExecutionDetail) args[0];
-        AuctionExecutionStatus auctionExecutionStatus = new AuctionExecutionStatus(bidExecutionDetail.getBidExecutionId(), bidExecutionDetail.getSlotId(),
-        		methodName.toUpperCase(), ProcessStatus.IN_PROGRESS.name(), bidExecutionDetail.getProductId(), methodName, LocalDateTime.now(), null);
-        auctionExecutionStatusRepository.save(auctionExecutionStatus);
-        Object result = joinPoint.proceed();
-        auctionExecutionStatus.setEndTime(LocalDateTime.now());
-        auctionExecutionStatus.setProcessStatus(ProcessStatus.COMPLETED.name());
-        auctionExecutionStatusRepository.save(auctionExecutionStatus);
-        
-        return result;
-    }
-    
 //    @Transactional
-//    @Before("@annotation(ProcessStatusUpdate)") // This pointcut expression targets all methods in your package
-//    public Object logExecutionProcessStatusBefore(ProceedingJoinPoint joinPoint) throws Throwable {
+//    @Around("@annotation(ProcessStatusUpdate)") // This pointcut expression targets all methods in your package
+//    public Object logExecutionProcessStatus(ProceedingJoinPoint joinPoint) throws Throwable {
 //    	MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 //    	String methodName = methodSignature.getName();
 //        Object[] args = joinPoint.getArgs();
@@ -111,4 +94,24 @@ public class LoggingAspect {
 //        
 //        return result;
 //    }
+    
+    @Before("@annotation(ProcessStatusUpdate)") // This pointcut expression targets all methods in your package
+    public void logExecutionProcessStatusBefore(JoinPoint joinPoint) throws Throwable {
+    	MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+    	String methodName = methodSignature.getName();
+        Object[] args = joinPoint.getArgs();
+
+       BidExecutionDetail bidExecutionDetail = (BidExecutionDetail) args[0];
+        AuctionExecutionStatus auctionExecutionStatus = new AuctionExecutionStatus(bidExecutionDetail.getBidExecutionId(), bidExecutionDetail.getSlotId(),
+        		methodName.toUpperCase(), ProcessStatus.IN_PROGRESS.name(), bidExecutionDetail.getProductId(), methodName, LocalDateTime.now(), null);
+        auctionExecutionStatusService.createExecutionStatus(auctionExecutionStatus);
+    }
+    
+    @After("@annotation(ProcessStatusUpdate)") // This pointcut expression targets all methods in your package
+    public void logExecutionProcessStatusAfter(JoinPoint joinPoint) throws Throwable {
+       Object[] args = joinPoint.getArgs();
+       BidExecutionDetail bidExecutionDetail = (BidExecutionDetail) args[0];
+       auctionExecutionStatusService.updateStatusEndTime(ProcessStatus.COMPLETED.name(),LocalDateTime.now(),bidExecutionDetail.getBidExecutionId());
+        
+    }
 }

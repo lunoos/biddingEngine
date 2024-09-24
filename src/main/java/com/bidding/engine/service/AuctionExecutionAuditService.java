@@ -1,5 +1,7 @@
 package com.bidding.engine.service;
 
-public interface AuctionExecutionAuditService {
+import com.bidding.engine.entity.AuctionExecutionAudit;
 
+public interface AuctionExecutionAuditService {
+	public AuctionExecutionAudit createExecutionAudit(AuctionExecutionAudit executionAudit);
 }

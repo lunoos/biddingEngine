@@ -18,21 +18,20 @@ public class AuctionProcessorImpl implements AuctionProcessor{
 
 
 	@Autowired
-	private AuctionSlotLiveRepository auLiveRepository;
+	private AuctionSlotLiveService auctionSlotLiveService;
 	
 	@ProcessStatusUpdate
-	@Transactional
 	@Override
 	public void process(BidExecutionDetail bidExecutionDetail) {
 		System.out.println("waiting for process to start");
 		waitUntil(bidExecutionDetail.getSlotStartTime());
 		bidExecutionDetail.setIsLive('Y');
-		auLiveRepository.updateLiveStatus("Y",bidExecutionDetail.getBidExecutionId());
+		auctionSlotLiveService.updateLiveStatus(bidExecutionDetail, 'Y');
 		System.out.println("waiting for process to end");
 		
         waitUntil(bidExecutionDetail.getSlotEndTime());
         bidExecutionDetail.setIsLive('N');
-        auLiveRepository.updateLiveStatus("N",bidExecutionDetail.getBidExecutionId());
+        auctionSlotLiveService.updateLiveStatus(bidExecutionDetail, 'N');
         System.out.println("waiting for process ended");
 	}
 	

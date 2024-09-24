@@ -3,6 +3,7 @@ package com.bidding.engine.service;
 import java.util.List;
 import java.util.Optional;
 
+import com.bidding.engine.dto.BidExecutionDetail;
 import com.bidding.engine.entity.AuctionSlotLive;
 
 public interface AuctionSlotLiveService {
@@ -19,4 +20,8 @@ public interface AuctionSlotLiveService {
     public AuctionSlotLive updateAuctionSlotLive(AuctionSlotLive auctionSlotLive);
 
     public void deleteAuctionSlotLive(Long liveSlotId);
+    
+    public void updateLiveStatus(BidExecutionDetail bidExecutionDetail, char status);
+    
+    public void updateHigestBid(BidExecutionDetail bidExecutionDetail);
 }

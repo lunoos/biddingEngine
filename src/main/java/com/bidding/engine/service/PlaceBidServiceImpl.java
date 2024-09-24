@@ -10,6 +10,7 @@ import com.bidding.engine.dto.BidRequest;
 import com.bidding.engine.dto.BidResponse;
 import com.bidding.engine.enums.BidResult;
 import com.bidding.engine.utils.AuctionExecutionMap;
+import com.bidding.engine.utils.IAuctionExecutionMap;
 
 import jakarta.transaction.Transactional;
 
@@ -17,7 +18,7 @@ import jakarta.transaction.Transactional;
 public class PlaceBidServiceImpl implements PlaceBidService{
 	
 	@Autowired
-	private AuctionExecutionMap auctionExecutionMap;
+	private IAuctionExecutionMap auctionExecutionMap;
 	
 	@Autowired
 	private FactoryService factoryService;
@@ -26,28 +27,28 @@ public class PlaceBidServiceImpl implements PlaceBidService{
 	private PostBidTaskService postBidTaskService;
 	
 	
-	@Transactional
 	@Override
     public BidResponse placeBid(BidRequest bidRequest) {
 		
 		BidResponse bidResponse = factoryService.geneBidResponse();
-        if (Objects.nonNull(auctionExecutionMap)&&!auctionExecutionMap.contains(bidRequest.getAuctionExecutionId()))
+		bidResponse.setResponse(BidResult.SUCCESS.name());
+        if (Objects.isNull(auctionExecutionMap)||!auctionExecutionMap.contains(bidRequest.getAuctionExecutionId())
+        		||auctionExecutionMap.lookup(bidRequest.getAuctionExecutionId()).getIsLive()=='N')
             bidResponse.setResponse(BidResult.AUCTION_NOT_LIVE.name());
-        
+        else {
         BidExecutionDetail bidExecutionDetail = auctionExecutionMap.lookup(bidRequest.getAuctionExecutionId());
         if (bidRequest.getBidAmount().compareTo(bidExecutionDetail.getBidBaseAmount()) <= 0)
         	bidResponse.setResponse(BidResult.BID_TOO_LOW.name());
         
-        if (bidRequest.getBidAmount().compareTo(bidExecutionDetail.getHighestBidAmount()) > 0) {
-        	synchronized(bidExecutionDetail) {
+        synchronized(bidExecutionDetail) {
         	    if (bidRequest.getBidAmount().compareTo(bidExecutionDetail.getHighestBidAmount()) > 0) {
         	        bidExecutionDetail.setHighestBidAmount(bidRequest.getBidAmount());
         	        bidExecutionDetail.setHighestBidderUserId(bidRequest.getUserId());
         	    }
-        	}
         }
         //wait for the acknowledgement
         postBidTaskService.executePostBidTask(bidExecutionDetail, bidRequest);
+        }
         return bidResponse;
     }
 }

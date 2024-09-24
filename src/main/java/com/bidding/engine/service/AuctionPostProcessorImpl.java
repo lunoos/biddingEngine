@@ -19,6 +19,9 @@ public class AuctionPostProcessorImpl implements AuctionPostProcessor{
 	@Autowired
 	private BidderRepository bidderRepository;
 	
+	@Autowired
+	private NotificationService notificationService;
+	
 	@ProcessStatusUpdate
 	@Transactional
 	@Override
@@ -26,7 +29,8 @@ public class AuctionPostProcessorImpl implements AuctionPostProcessor{
 		// TODO Auto-generated method stub
 		bidderRepository.deleteBySlotId(bidExecutionDetail.getSlotId());
 		auctionSlotRepository.deleteById(bidExecutionDetail.getSlotId());
-		
+		//Add logic to send mail to the winner.
+		notificationService.sendNotification(bidExecutionDetail);
 	}
 
 }

@@ -12,6 +12,8 @@ import com.bidding.engine.dto.BidRequest;
 import com.bidding.engine.dto.BidResponse;
 import com.bidding.engine.service.PlaceBidService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/bid")
 public class BiddingController {
@@ -20,7 +22,7 @@ public class BiddingController {
 	private PlaceBidService placeBidService;
 	
 	@PostMapping
-	public ResponseEntity<BidResponse> placeBid(@RequestBody BidRequest bidRequest){
-		return new ResponseEntity<>(placeBidService.placeBid(bidRequest), HttpStatus.CREATED);
+	public ResponseEntity<BidResponse> placeBid(@Valid @RequestBody BidRequest bidRequest){
+		return new ResponseEntity<>(placeBidService.placeBid(bidRequest), HttpStatus.ACCEPTED);
 	}
 }

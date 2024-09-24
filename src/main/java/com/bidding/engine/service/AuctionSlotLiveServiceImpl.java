@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.bidding.engine.dto.BidExecutionDetail;
 import com.bidding.engine.entity.AuctionSlotLive;
 import com.bidding.engine.repository.AuctionSlotLiveRepository;
 
@@ -43,5 +44,16 @@ public class AuctionSlotLiveServiceImpl implements  AuctionSlotLiveService{
     @Transactional
     public void deleteAuctionSlotLive(Long liveSlotId) {
         auctionSlotLiveRepository.deleteById(liveSlotId);
+    }
+    
+    @Transactional
+    public void updateLiveStatus(BidExecutionDetail bidExecutionDetail, char status) {
+        bidExecutionDetail.setIsLive(status);
+        auctionSlotLiveRepository.updateLiveStatus(String.valueOf(status), bidExecutionDetail.getBidExecutionId());
+    }
+    
+    @Transactional
+    public void updateHigestBid(BidExecutionDetail bidExecutionDetail) {
+    	auctionSlotLiveRepository.updateHighBid(bidExecutionDetail.getHighestBidAmount(),bidExecutionDetail.getBidExecutionId());
     }
 }

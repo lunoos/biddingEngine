@@ -30,8 +30,8 @@ public class AuctionExecutionAudit {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
-    @Column(name = "bidder_id", nullable = false)
-    private Long bidderId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
     @Column(name = "bid_amount", nullable = false, precision = 9, scale = 2)
     private BigDecimal bidAmount;
@@ -86,13 +86,13 @@ public class AuctionExecutionAudit {
 	}
 
 
-	public Long getBidderId() {
-		return bidderId;
+	public Long getUserId() {
+		return userId;
 	}
 
 
-	public void setBidderId(Long bidderId) {
-		this.bidderId = bidderId;
+	public void setUserId(Long userId) {
+		this.userId = userId;
 	}
 
 
@@ -116,12 +116,12 @@ public class AuctionExecutionAudit {
 	}
 
 	public AuctionExecutionAudit( String auctionExeId, Long slotId, Long productId,
-			Long bidderId, BigDecimal bidAmount, LocalDateTime createdAt) {
+			Long userId, BigDecimal bidAmount, LocalDateTime createdAt) {
 		super();
 		this.auctionExeId = auctionExeId;
 		this.slotId = slotId;
 		this.productId = productId;
-		this.bidderId = bidderId;
+		this.userId = userId;
 		this.bidAmount = bidAmount;
 		this.createdAt = createdAt;
 	}

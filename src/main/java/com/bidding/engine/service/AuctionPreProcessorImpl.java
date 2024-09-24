@@ -12,6 +12,7 @@ import com.bidding.engine.repository.AuctionSlotLiveRepository;
 import com.bidding.engine.repository.AuctionSlotRepository;
 import com.bidding.engine.repository.ProductRepository;
 import com.bidding.engine.utils.AuctionExecutionMap;
+import com.bidding.engine.utils.IAuctionExecutionMap;
 
 import jakarta.transaction.Transactional;
 
@@ -28,13 +29,12 @@ public class AuctionPreProcessorImpl implements AuctionPreProcessor{
 	private AuctionSlotLiveRepository auLiveRepository;
 	
 	@Autowired
-	private AuctionExecutionMap auctionExecutionMap;
+	private IAuctionExecutionMap auctionExecutionMap;
 
 	@Transactional
 	@PreStatusUpdate
 	@Override
 	public BidExecutionDetail preProcess(AuctionSlot auctionSlot) {
-		// TODO Auto-generated method stub
 		Product product = productRepository.getById(auctionSlot.getProductId());
 		BidExecutionDetail bidExecutionDetail = factoryService.generateBidExeDet(auctionSlot,product.getBasePrice());
 		// add the slot to live table

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import com.bidding.engine.dto.BidExecutionDetail;
 
 @Component
-public class AuctionExecutionMap {
+public class AuctionExecutionMap implements IAuctionExecutionMap {
 	private final ConcurrentMap<String, BidExecutionDetail> map;
 
     public AuctionExecutionMap() {
